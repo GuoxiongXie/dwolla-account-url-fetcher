@@ -10,37 +10,23 @@ import io.swagger.client.model.CatalogResponse;
 import io.swagger.client.model.HalLink;
 
 public class DwollaAccountUrlFetcher {
+    
+    private static final String RESOURCE_NAME = "config.properties";
+    private static final String ACCESS_TOKEN = "accessToken";
+    private static final String BASE_PATH = "dwollaApiClientBasePath";
 
     public static void main(String[] args) {
-        Properties prop = new Properties();
-        InputStream input = null;
-
-        String accessToken = null;
-        String dwollaApiClientBasePath = null;
-
-        try {
-
-            input = new FileInputStream("config.properties");
-
-            // load a properties file
-            prop.load(input);
-
-            // get the property value and print it out
-            accessToken = prop.getProperty("accessToken");
-            dwollaApiClientBasePath = prop.getProperty("dwollaApiClientBasePath");
-
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Properties props = new Properties();
+        try(InputStream resourceStream = loader.getResourceAsStream(RESOURCE_NAME)) {
+            props.load(resourceStream);
         } catch (IOException ex) {
             ex.printStackTrace();
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
+        String accessToken = props.getProperty(ACCESS_TOKEN);
+        String dwollaApiClientBasePath = props.getProperty(BASE_PATH);
+        
         if (accessToken != null && dwollaApiClientBasePath != null) {
             ApiClient apiClient = new ApiClient();
             apiClient.setBasePath(dwollaApiClientBasePath);
@@ -58,6 +44,8 @@ public class DwollaAccountUrlFetcher {
                 e.printStackTrace();
             }
 
+        } else {
+            System.out.println("Please enter the values in config.properties");
         }
     }
 
